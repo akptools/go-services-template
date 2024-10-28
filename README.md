@@ -4,7 +4,7 @@ This is an api template built using chi framework for creating REST APIs using G
 
 ## Packages
 
-This template comes with some packages useful for getting started with Go.
+This template comes with some packages useful for getting started.
 
 - godotenv - For loading env variables
 - chi - The core framework for creating REST APIs
