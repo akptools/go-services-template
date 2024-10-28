@@ -1,0 +1,72 @@
+name: pnp-ui-stage
+
+on:
+  push:
+    branches:
+      - stage
+
+env:
+  IMAGE_NAME: ${{ secrets.DOCKER_USER }}/pnp-ui-stage:${{ github.sha }}
+  APP_NAME: pnp-ui-stage
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22.x]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run eslint
+      run: npm run lint
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+
+    - name: Login to DockerHub
+      run: |
+          echo ${{ secrets.DOCKER_PAT }} | docker login -u ${{ secrets.DOCKER_USER }} --password-stdin
+
+    - name: Build and Publish
+      run: |
+        docker buildx ls
+        docker buildx build . --tag ${{ env.IMAGE_NAME }} --platform=linux/arm64/v8
+        docker push ${{ env.IMAGE_NAME }}
+
+  deploy:
+    needs: publish
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install ssh keys
+      run: |
+        install -m 600 -D /dev/null ~/.ssh/id_rsa
+        echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+        ssh-keyscan -p ${{ secrets.SSH_PORT }} -H "${{ secrets.SSH_HOST }}" > ~/.ssh/known_hosts
+    - name: Connect, Pull and Run
+      run: |
+        ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST}} "cd ${{ secrets.WORK_DIR }} && \
+                                  ./deploy-api.sh ${{ env.IMAGE_NAME }}"
+    - name: Cleanup
+      run: |
+        rm -rf ~/.ssh/id_rsa
+        docker logout
