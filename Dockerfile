@@ -7,13 +7,13 @@ RUN go mod download
 
 COPY . ./
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o /api ./cmd/api/main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm64 make
 
 FROM gcr.io/distroless/base-debian11 AS build-release-stage
 
 WORKDIR /
 
-COPY --from=build-stage /api /api
+COPY --from=build-stage /bin/api /api
 
 USER nonroot:nonroot
 
