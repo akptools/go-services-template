@@ -1,8 +1,10 @@
+app_name := api
+
 run: build
-	@./bin/api
+	@./bin/$(app_name)
 
 build:
-	@go build -o ./bin/api ./cmd/api/main.go
+	@go build -o ./bin/$(app_name) ./cmd/$(app_name)/main.go
 
 dev:
 	air

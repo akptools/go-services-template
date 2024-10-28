@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -28,6 +29,8 @@ func (s *Server) Run() {
 	r := chi.NewRouter()
 	registerMiddleware(r)
 	registerRoutes(r)
+
+	slog.Info("Listening on", "port", strings.TrimPrefix(s.listenAddr, ":"))
 	err := http.ListenAndServe(s.listenAddr, r)
 	if err != nil {
 		slog.Error("An error occured while starting the server", "err:", err.Error())
