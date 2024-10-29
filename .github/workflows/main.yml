@@ -3,11 +3,11 @@ name: pnp-ui-stage
 on:
   push:
     branches:
-      - stage
+      - dev
 
 env:
-  IMAGE_NAME: ${{ secrets.DOCKER_USER }}/pnp-ui-stage:${{ github.sha }}
-  APP_NAME: pnp-ui-stage
+  APP_NAME: api-dev
+  IMAGE_NAME: ${{ secrets.DOCKER_USER }}/${APP_NAME}:${{ github.sha }}
 
 jobs:
   build:
