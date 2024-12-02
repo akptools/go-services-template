@@ -1,32 +1,22 @@
 package db
 
 import (
-	"database/sql"
+	"context"
 	"fmt"
-	"os"
 
-	_ "github.com/lib/pq"
+	"github.com/akptools/go-services-template/internal/util"
 )
 
-type Database struct {
-	DB *sql.DB
+type Database interface {
+	Disconnect(ctx context.Context) error
+	// Add other CRUD Methods
 }
 
-func NewDatabase() (*Database, error) {
-	user := os.Getenv("DB_USER")
-	password := os.Getenv("DB_PASSWORD")
-	host := os.Getenv("DB_HOST")
-	port := os.Getenv("DB_PORT")
-	dbName := os.Getenv("DB_NAME")
-	sslMode := os.Getenv("SSL_MODE")
-
-	connString := fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=%s", user, password, host, port, dbName, sslMode)
-	db, err := sql.Open("postgres", connString)
-	if err != nil {
-		return nil, err
+func NewDatabase(dbType util.DB, uri string) (Database, error) {
+	if dbType == util.MongoDB {
+		return NewMongoDB(uri)
+	} else if dbType == util.PostgresDB {
+		return NewPostgresDB(uri)
 	}
-	if err := db.Ping(); err != nil {
-		return nil, err
-	}
-	return &Database{DB: db}, nil
+	return nil, fmt.Errorf("unrecognized db type")
 }

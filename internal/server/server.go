@@ -1,23 +1,23 @@
 package server
 
 import (
-	"database/sql"
 	"log/slog"
 	"net/http"
 	"os"
 	"strings"
 
+	"github.com/akptools/go-services-template/internal/db"
 	"github.com/go-chi/chi/v5"
 )
 
 // Defines the Server struct contaning a listenAddr and a pointer to db
 type Server struct {
 	listenAddr string
-	db         *sql.DB
+	db         db.Database
 }
 
 // Initializes a new server object and returns it
-func NewServer(listenAddr string, db *sql.DB) *Server {
+func NewServer(listenAddr string, db db.Database) *Server {
 	return &Server{
 		listenAddr: listenAddr,
 		db:         db,
